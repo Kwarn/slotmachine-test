@@ -1,15 +1,14 @@
-import React from 'react';
+// removed react import as no JSX is being returned
 import { useSelector } from 'react-redux';
 
-// TASK
-// Display the number of tries, i.e 'You've tried x times'
+// Math.abs provides the difference between tries and total tries allowed
+
+const TOTAL_TRIES_ALLOWED = 5;
 
 function Tries() {
   const tally = useSelector(state => state.tally);
 
-  return `You have tried ${tally.tries} times!
-
-   Tries remaining: ${Math.abs(tally.tries - 5)}`;
+  return `Attempts remaining: ${Math.abs(tally.tries - TOTAL_TRIES_ALLOWED)}`;
 }
 
 export default Tries;

@@ -13,12 +13,6 @@ export const listTally = (state = tallyState, action) => {
     case RESET_TALLY:
       return { tries: 0, wins: 0 };
 
-    // TASK
-    // Increase the number of tries by 1 with type ADD_TO_TRIES
-
-    // TASK
-    // Reset the state values back to 0 with type RESET_TALLY
-
     default:
       return state;
   }

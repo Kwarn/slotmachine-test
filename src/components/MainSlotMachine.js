@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useDispatch, useSelector, connect } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToWins, addToTries, resetTally } from '../actions/tallyActions';
 import Tries from './Tries';
 import Wins from './Wins';
+
+// App is now responsive, further visual tweaks could be added
+// though for the sake of time I'm happy with it like this.
 
 const Parent = styled.div`
   height: 100%;
@@ -19,7 +22,7 @@ const Parent = styled.div`
 
 const SubDiv = styled.div`
   position: relative;
-  height: 80%;
+  height: 50%;
   width: 40%;
   margin: 20px;
   padding: 30px;
@@ -43,6 +46,7 @@ const Header = styled.div`
   align-items: center;
   font-size: 26px;
   color: white;
+  margin-bottom: 20px;
 `;
 
 const Slots = styled.div`
@@ -53,13 +57,12 @@ const Slots = styled.div`
 `;
 
 const Slot = styled.div`
-  height: 200px;
-  width: 120px;
+  width: 100%;
   border: 2px solid black;
 `;
 
 const Spin = styled.button`
-  max-width: 90%;
+  max-width: 80%;
   width: 300px;
   height: 100px;
   display: flex;
@@ -76,64 +79,63 @@ const Spin = styled.button`
 `;
 
 const Tally = styled.div`
-  white-space: pre-line;
+  max-height: 80%;
   display: flex;
   text-align: center;
   flex-direction: column;
   width: 100%;
   font-size: 20px;
+  @media (max-width: 400px) {
+    font-size: 15px;
+  }
 `;
 
 const MainSlotMachine = () => {
-  // The dispatch function for dispatching actions when we
-  // call our action creators.
+  // this way of accessing dispatch & state without connect() & mapState/DispatchToProps is new to me, very cool!
   const dispatch = useDispatch();
-
-  // Getting our main tally data from redux state.
   const tally = useSelector(state => state.tally);
 
-  // A few random base colors. To worsen the odds of winning,
-  // you can add more colors.
-  const baseColors = ['red', 'blue', 'yellow', 'green'];
+  // Kept the default amount of colors as it makes manual testing easier for us both!
+  // colors can be added at any time without breaking the app.
+  const baseColors = ['red', 'blue', 'yellow'];
 
-  // By default, the slot machine colors are all grey. You can change
-  // this if you want.
   const [newColors, setColors] = useState(['grey', 'grey', 'grey']);
 
-  // TASK
-  // Here is the main spin function which should be called
-  // every time we press the Spin button. This function should:
-
-  // 1. Add to our tally tries in the redux state. (i.e dispatch(addToTries()))
-
-  // 2. Randomly select a color 3 times from our base colors, and
-  // set them in our local state above, newColors.
-
-  // 3. If all the colors are the same, we add to our tally wins.
-
   function spin() {
+    // generates random int between 0-max
     function getRandomInt(max) {
       return Math.floor(Math.random() * Math.floor(max));
     }
+
+    // creates an array and fills it with 3 random color strings from baseColors.
+    // by accessing the arrays index using a random interger between 0 and the length of the array
+    // colors can be added to the baseColors with no further changes needed.
+    // alternative implimentation could use while(newArr.length < 3) newArr.push(colors[RandomIntIndex])
+    // this seemed the cleanest way, though I'm unsure of the perfomance vs while, in this app I imagine it's negligible
 
     const newColorsArr = Array.from(
       { length: 3 },
       () => baseColors[getRandomInt(baseColors.length)]
     );
+
     setColors(newColorsArr);
 
+    // gets the unique occurrences of color strings in newColorsArr, if only one exists all slots must match.
+
     const isWinningSpin = new Set(newColorsArr).size === 1 ? true : false;
+
     if (isWinningSpin) {
       dispatch(addToWins());
     }
     dispatch(addToTries());
   }
 
-  // TASK
-  // In this lifecycle function, of the tally wins reaches 5,
-  // have a window.confirm message come up telling the user to 'Stop Gambling!'.
-  // on 5 wins the spin button should also become disabled.
-  // On selecting 'ok', the tally wins and tries are reset.
+  // *** on 5 wins the spin button should also become disabled. ***
+  // had trouble with this as I'm unfamiliar with styled-components - CSS modules was my go to.
+  // In order to dynamically add properties/attributes to styled components it seems you need access to props
+  // the CSS declarations would need to exist within the component function scope.
+  // I assume there is another way to do this otherwise you may have declared them in the function to start with(?)
+  // After 45 mins of attempts: For the sake of time I have gone with this implementation I will do some further reading in the meantime!
 
   const disabledSpinButtonProps =
     tally.tries >= 5
@@ -143,27 +145,31 @@ const MainSlotMachine = () => {
         }
       : {};
 
+  // creates an array of <Slot/> components with background-color tied to their respective index in newColors
+  const slots = newColors.map((c, idx) => (
+    <Slot key={idx} style={{ backgroundColor: newColors[idx] }} />
+  ));
+
   useEffect(() => {
     if (tally.tries >= 5) {
-      if (window.confirm('Stop Gambling!')) {
+      // sets the message and grammar based on number of wins
+      const message =
+        tally.wins > 0
+          ? `Congratulations! You won ${tally.wins} ${
+              tally.wins > 1 ? 'times' : 'time'
+            }.`
+          : `Unlucky, you didn't win! Maybe it's time to stop!`;
+      if (window.confirm(message)) {
+        setColors(['grey', 'grey', 'grey']);
         dispatch(resetTally());
       }
     }
-  });
-
-  // TASK
-  // Within the Slots div, create 3 slots. (Create a styled component called 'Slot'
-  // and render it out 3 times). Their background colors should be those stored
-  // in the newColors array. (Use inline styling)
+  }, [tally.tries, tally.wins, dispatch]);
 
   return (
     <Parent>
       <SubDiv>
-        <Slots>
-          <Slot style={{ backgroundColor: newColors[0] }} />
-          <Slot style={{ backgroundColor: newColors[1] }} />
-          <Slot style={{ backgroundColor: newColors[2] }} />
-        </Slots>
+        <Slots>{slots}</Slots>
         <Spin {...disabledSpinButtonProps} onClick={() => spin()}>
           Spin!
         </Spin>

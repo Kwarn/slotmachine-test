@@ -1,15 +1,16 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 
-// TASK
-// Display the number of wins, i.e 'You've won x times'
+// Like the window.confirm() message in MainSlotMachine
+// this sets the message displayed and grammar based on tally.wins
 
 function Wins() {
   const tally = useSelector(state => state.tally);
   let message =
     tally.wins > 0
-      ? `Congratulations! You have won ${tally.wins} times!`
-      : `No wins yet, keep trying!`;
+      ? `Congratulations! You have won ${tally.wins} ${
+          tally.wins > 1 ? 'times!' : 'time!'
+        }`
+      : `No wins yet. Keep trying!`;
 
   return message;
 }
