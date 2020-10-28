@@ -1,3 +1,4 @@
+// removed react import as no JSX is being returned
 import { useSelector } from 'react-redux';
 
 // Like the window.confirm() message in MainSlotMachine
