@@ -138,7 +138,7 @@ const MainSlotMachine = () => {
   // After 45 mins of attempts: For the sake of time I have gone with this implementation I will do some further reading in the meantime!
 
   const disabledSpinButtonProps =
-    tally.tries >= 5
+    tally.wins >= 5
       ? {
           disabled: true,
           style: { backgroundColor: 'grey' },
@@ -151,14 +151,8 @@ const MainSlotMachine = () => {
   ));
 
   useEffect(() => {
-    if (tally.tries >= 5) {
-      // sets the message and grammar based on number of wins
-      const message =
-        tally.wins > 0
-          ? `Congratulations! You won ${tally.wins} ${
-              tally.wins > 1 ? 'times' : 'time'
-            }.`
-          : `Unlucky, you didn't win! Maybe it's time to stop!`;
+    if (tally.wins === 5) {
+      const message = `Congratulations! You won 5 times, Time to stop gambling!`;
       if (window.confirm(message)) {
         setColors(['grey', 'grey', 'grey']);
         dispatch(resetTally());
